@@ -5,24 +5,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
-    $stmt->bind_param("ss", $email, $password);
+
+    $stmt = $conn->prepare("SELECT id, password FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
     if ($user) {
-        $token = bin2hex(random_bytes(16));
+        
+        if (password_verify($password, $user['password'])) {
+            
+            $token = bin2hex(random_bytes(16));
 
-        $stmt = $conn->prepare("INSERT INTO login (userId, token) VALUES (?, ?)");
-        $stmt->bind_param("is", $user['id'], $token);
-        $stmt->execute();
+            
+            $stmt = $conn->prepare("INSERT INTO login (userId, token) VALUES (?, ?)");
+            $stmt->bind_param("is", $user['id'], $token);
+            $stmt->execute();
 
-        setcookie("user_id", $user['id'], time() + (86400 * 7), "/"); // Valid for 7 days
-        setcookie("auth_token", $token, time() + (86400 * 7), "/");
+            
+            setcookie("user_id", $user['id'], time() + (86400 * 7), "/");
+            setcookie("auth_token", $token, time() + (86400 * 7), "/");
 
-        header("Location: ../index.php");
-        exit;
+            header("Location: ../index.php");
+            exit;
+        } else {
+            echo "Invalid email or password.";
+        }
     } else {
         echo "Invalid email or password.";
     }
@@ -35,8 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="../output.css">
+    <title>Login</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body>
@@ -57,4 +65,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
 </body>
 </html>
-

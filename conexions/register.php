@@ -6,9 +6,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    
+ 
+    $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
     $stmt = $conn->prepare("INSERT INTO users (user, email, password) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $user, $email, $password);
+    $stmt->bind_param("sss", $user, $email, $hashed_password);
 
     if ($stmt->execute()) {
         echo "Registration successful. <a href='login.php'>Login here</a>";
@@ -19,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->close();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
