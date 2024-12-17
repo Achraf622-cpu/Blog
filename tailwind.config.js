@@ -1,8 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    content: ["./src/**/*.{html,js,php}"],
+    content: [
+      "./*.php",           // All PHP files in the root directory
+      "./**/*.php",        // All PHP files in subdirectories
+      "./src/**/*.php",    // Adjust this based on your project structure
+      "./components/**/*.php"
+    ],
     theme: {
       extend: {},
     },
     plugins: [],
   }
+  
