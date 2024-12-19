@@ -1,3 +1,25 @@
+<?php
+require '../conexions/connect.php';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $titre = $_POST['titre'];
+    $para = $_POST['para'];
+    $tags = $_POST['tags'];
+    $img = $_POST['img'];
+    $stmt = $conn->prepare("INSERT INTO articles (titre, para, img) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("sss", $titre, $para, $img);
+    if ($stmt->execute()) {
+    echo "User added successfully!";
+    } else {
+    echo "Error: " . $stmt->error;
+    }
+    $stmt->close();
+   }
+   ?>
+   <!-- <form method="POST">
+    <input type="text" name="name" placeholder="Name" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <button type="submit">Add User</button>
+   </form> -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,18 +69,18 @@
             <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
                 <h2 class="text-2xl font-bold mb-4 text-blue-400">Add a New Post</h2>
 
-                <form>
+                <form method="POST">
                    
                     <label class="block text-white mb-2">
                         Title:
                         <input type="text" placeholder="Enter your post title" 
-                               class="w-full p-2 rounded bg-gray-700 text-white mt-1">
+                               class="w-full p-2 rounded bg-gray-700 text-white mt-1" name="titre">
                     </label>
 
                    
                     <label class="block text-white mb-2">
                         Description:
-                        <textarea placeholder="Write a description for your post..." 
+                        <textarea name="para" placeholder="Write a description for your post..." 
                                   class="w-full p-2 rounded bg-gray-700 text-white mt-1"></textarea>
                     </label>
 
@@ -66,13 +88,13 @@
                     <label class="block text-white mb-2">
                         Tags (comma-separated):
                         <input type="text" placeholder="E.g., coding, design, technology" 
-                               class="w-full p-2 rounded bg-gray-700 text-white mt-1">
+                               class="w-full p-2 rounded bg-gray-700 text-white mt-1" name="tags">
                     </label>
 
                    
                     <label class="block text-white mb-4">
                         Upload Image:
-                        <input type="file" class="block w-full text-white mt-1">
+                        <input type="file" class="block w-full text-white mt-1" name="img">
                     </label>
 
                    

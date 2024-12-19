@@ -1,33 +1,30 @@
 <?php
 require 'connect.php';
+session_start(); 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
 
-    $stmt = $conn->prepare("SELECT id, password FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT u.id, u.password, r.role_name FROM users u JOIN roles r ON u.role_id = r.id WHERE u.email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
     if ($user) {
-        
         if (password_verify($password, $user['password'])) {
-            
-            $token = bin2hex(random_bytes(16));
 
-            
-            $stmt = $conn->prepare("INSERT INTO login (userId, token) VALUES (?, ?)");
-            $stmt->bind_param("is", $user['id'], $token);
-            $stmt->execute();
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['role'] = $user['role_name'];
 
-            
-            setcookie("user_id", $user['id'], time() + (86400 * 7), "/");
-            setcookie("auth_token", $token, time() + (86400 * 7), "/");
 
-            header("Location: ../index.php");
+            if ($user['role_name'] === 'admin') {
+                header("Location: ../admin/adminpro.php");
+            } else {
+                header("Location: ../profile.php");
+            }
             exit;
         } else {
             echo "Invalid email or password.";
@@ -39,6 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->close();
 }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

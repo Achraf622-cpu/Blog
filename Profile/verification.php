@@ -1,10 +1,18 @@
-<?php 
+<?php
 require '../conexions/connect.php';
+session_start();
 
-if (!isset($_COOKIE['user_id']) || !isset($_COOKIE['auth_token'])) {
+if (!isset($_SESSION['user_id'])) {
+
     header("Location: ../conexions/login.php");
     exit;
-} else {  
-    header("Location: profile.php");
+} else {
+
+    if ($_SESSION['role'] === 'admin') {
+        header("Location: ../admin/adminpro.php");
+    } else {
+        header("Location: profile.php");
+    }
+    exit;
 }
 ?>
