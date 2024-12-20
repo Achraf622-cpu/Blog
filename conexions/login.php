@@ -8,7 +8,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = $_POST['password'];
 
     if (filter_var($email, FILTER_VALIDATE_EMAIL) && !empty($password)) {
-        $stmt = $conn->prepare("SELECT u.id, u.password, r.name FROM users u JOIN roles r ON u.id_role = r.id WHERE u.email = ?");
+
+        $stmt = $conn->prepare("SELECT u.id, u.password, u.username, r.name FROM users u JOIN roles r ON u.id_role = r.id WHERE u.email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -18,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if (password_verify($password, $user['password'])) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['role'] = $user['name'];
+                $_SESSION['username'] = $user['username']; // Store the username in session
 
                 if ($user['name'] === 'admin') {
                     header("Location: ../admin/adminpro.php");
@@ -46,10 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Login</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-gradient-to-r from-blue-500 to-blue-700 text-white">
 <div class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center z-50">
-    <div class="bg-white w-full max-w-md mx-4 p-8 rounded-lg shadow-lg">
-        <h2 class="text-3xl font-semibold text-center text-gray-700 mb-6">Login</h2>
+    <div class="bg-gray-800 w-full max-w-md mx-4 p-8 rounded-lg shadow-lg">
+        <h2 class="text-3xl font-extrabold text-center text-blue-400 mb-6">Login</h2>
         <?php if (!empty($error_message)): ?>
             <div class="mb-4 text-red-500 text-center">
                 <?php echo htmlspecialchars($error_message); ?>

@@ -10,7 +10,8 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
 $user_id = $_SESSION['user_id'];
 $role = $_SESSION['role'];
 
-if ($role === 'admin') {
+
+if ($role == 1) {
     header("Location: ../admin/adminpro.php");
     exit;
 } else {
