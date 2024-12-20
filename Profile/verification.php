@@ -2,17 +2,19 @@
 require '../conexions/connect.php';
 session_start();
 
-if (!isset($_SESSION['user_id'])) {
-
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {
     header("Location: ../conexions/login.php");
     exit;
-} else {
+}
 
-    if ($_SESSION['role'] === 'admin') {
-        header("Location: ../admin/adminpro.php");
-    } else {
-        header("Location: profile.php");
-    }
+$user_id = $_SESSION['user_id'];
+$role = $_SESSION['role'];
+
+if ($role === 'admin') {
+    header("Location: ../admin/adminpro.php");
+    exit;
+} else {
+    header("Location: profile.php");
     exit;
 }
 ?>

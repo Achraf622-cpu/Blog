@@ -2,7 +2,7 @@
 $host = '127.0.0.1';
 $user = 'root';
 $pass = 'password';
-$database = 'blog';
+$database = 'blogs';
 
 $conn = new mysqli($host, $user, $pass, $database);
 
