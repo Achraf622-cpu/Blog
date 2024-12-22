@@ -10,6 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $username = $_SESSION['username'];
 
+// Handle new post submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $titre = htmlspecialchars($_POST['titre']);
     $para = htmlspecialchars($_POST['para']);
@@ -29,18 +30,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $img_path = null;
     }
 
-
     $stmt = $conn->prepare("INSERT INTO articles (titre, para, img, id_users) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("sssi", $titre, $para, $img_path, $user_id);
 
     if ($stmt->execute()) {
         $article_id = $stmt->insert_id;
 
-
-        $tags_array = explode(',', $tags);
+        $tags_array = array_filter(array_map('trim', explode(',', $tags)));
         foreach ($tags_array as $tag) {
-            $tag = trim($tag);
-
             $stmt_tag = $conn->prepare("SELECT id FROM tags WHERE tag = ?");
             $stmt_tag->bind_param("s", $tag);
             $stmt_tag->execute();
@@ -61,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt_tagart->execute();
         }
 
-
         header("Location: " . $_SERVER['PHP_SELF']);
         exit();
     } else {
@@ -69,11 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-
+// Handle delete request
 if (isset($_GET['delete_id'])) {
     $delete_id = intval($_GET['delete_id']);
-
-
     $stmt = $conn->prepare("DELETE FROM articles WHERE id = ? AND id_users = ?");
     $stmt->bind_param("ii", $delete_id, $user_id);
 
@@ -82,7 +76,6 @@ if (isset($_GET['delete_id'])) {
     } else {
         echo "<script>Swal.fire('Error!', 'There was a problem deleting the article.', 'error');</script>";
     }
-
 
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
@@ -97,10 +90,8 @@ if (isset($_GET['delete_id'])) {
     <title>User Profile</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 </head>
 <body class="bg-gradient-to-r from-gray-900 to-gray-800 text-white">
-
 <div class="flex min-h-screen">
     <aside class="w-1/4 bg-gray-800 p-6 border-r border-gray-700">
         <h2 class="text-3xl font-extrabold text-blue-400 mb-6">User Menu</h2>
@@ -112,7 +103,6 @@ if (isset($_GET['delete_id'])) {
     </aside>
 
     <main class="w-3/4 p-8 bg-gray-900 relative">
-
         <a href="../conexions/logout.php" class="absolute top-4 right-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Logout</a>
 
         <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-6">
@@ -125,61 +115,49 @@ if (isset($_GET['delete_id'])) {
             <form method="POST" enctype="multipart/form-data">
                 <label class="block text-white mb-2">
                     Title:
-                    <input type="text" placeholder="Enter your post title" 
-                           class="w-full p-2 rounded bg-gray-700 text-white mt-1" name="titre">
+                    <input type="text" name="titre" placeholder="Enter your post title" class="w-full p-2 rounded bg-gray-700 text-white mt-1" required>
                 </label>
-
                 <label class="block text-white mb-2">
                     Description:
-                    <textarea name="para" placeholder="Write a description for your post..." 
-                              class="w-full p-2 rounded bg-gray-700 text-white mt-1"></textarea>
+                    <textarea name="para" placeholder="Write a description for your post..." class="w-full p-2 rounded bg-gray-700 text-white mt-1" required></textarea>
                 </label>
-
                 <label class="block text-white mb-2">
                     Tags (comma-separated):
-                    <input type="text" placeholder="E.g., coding, design, technology" 
-                           class="w-full p-2 rounded bg-gray-700 text-white mt-1" name="tags">
+                    <input type="text" name="tags" placeholder="E.g., coding, design, technology" class="w-full p-2 rounded bg-gray-700 text-white mt-1">
                 </label>
-
                 <label class="block text-white mb-4">
                     Upload Image:
-                    <input type="file" class="block w-full text-white mt-1" name="img">
+                    <input type="file" name="img" class="block w-full text-white mt-1">
                 </label>
-
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Submit Post
-                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Submit Post</button>
             </form>
         </div>
 
         <div class="mt-10">
-    <h2 class="text-2xl font-bold text-blue-400 mb-4">Your Blogs</h2>
-    <?php 
-        $stmt = $conn->prepare("SELECT * FROM articles WHERE id_users = ?");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-    ?>
-    <?php if ($result->num_rows > 0): ?>
-        <?php while ($row = $result->fetch_assoc()) { ?>
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg mb-6">
-                <h2 class="text-xl font-bold text-blue-400"><?php echo htmlspecialchars($row['titre']); ?></h2>
-                <?php if (!empty($row['img'])): ?>
-                    <img src="<?php echo htmlspecialchars($row['img']); ?>" alt="<?php echo htmlspecialchars($row['titre']); ?>" class="w-full rounded-lg mt-4">
-                <?php endif; ?>
-                <p class="text-gray-400 mt-4"><?php echo htmlspecialchars($row['para']); ?></p>
-                <p class="text-gray-500 text-sm mt-2">Tags: <?php echo htmlspecialchars($row['tags']) ?: 'None'; ?></p>
-                
+            <h2 class="text-2xl font-bold text-blue-400 mb-4">Your Blogs</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <?php
+                $stmt = $conn->prepare("SELECT * FROM articles WHERE id_users = ?");
+                $stmt->bind_param("i", $user_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
 
-                <a href="?delete_id=<?php echo $row['id']; ?>" 
-                   class="mt-4 text-red-600 hover:text-red-800 transition duration-300"
-                   onclick="return confirm('Are you sure you want to delete this post?');">Delete Post</a>
+                if ($result->num_rows > 0):
+                    while ($row = $result->fetch_assoc()): ?>
+                        <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
+                            <h3 class="text-lg font-bold text-blue-400"><?php echo htmlspecialchars($row['titre']); ?></h3>
+                            <?php if (!empty($row['img'])): ?>
+                                <img src="<?php echo htmlspecialchars($row['img']); ?>" alt="<?php echo htmlspecialchars($row['titre']); ?>" class="w-full rounded-lg mt-4">
+                            <?php endif; ?>
+                            <p class="text-gray-400 mt-4"><?php echo htmlspecialchars(substr($row['para'], 0, 100)) . '...'; ?></p>
+                            <a href="?delete_id=<?php echo $row['id']; ?>" class="text-red-600 hover:text-red-800 mt-4 block">Delete Post</a>
+                        </div>
+                    <?php endwhile;
+                else: ?>
+                    <p class="text-gray-400">No articles found.</p>
+                <?php endif; ?>
             </div>
-        <?php } ?>
-    <?php else: ?>
-        <p class="text-gray-400">No articles found.</p>
-    <?php endif; ?>
-</div>
+        </div>
     </main>
 </div>
 </body>

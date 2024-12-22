@@ -50,7 +50,7 @@ if (isset($_GET['ban_user'])) {
 
 <div class="flex min-h-screen">
 
-
+    <!-- Sidebar -->
     <aside class="w-1/4 bg-gray-800 p-6 border-r border-gray-700">
         <h2 class="text-3xl font-extrabold text-blue-400 mb-6">Admin Panel</h2>
         <ul class="space-y-6">
@@ -58,16 +58,19 @@ if (isset($_GET['ban_user'])) {
             <li><a href="manage.php" class="block text-white hover:text-blue-400 transition duration-300">Manage Blogs</a></li>
             <li><a href="" class="block text-white hover:text-blue-400 transition duration-300">Manage Users</a></li>
         </ul>
+        <div class="mt-6">
+            <a href="../conexions/logout.php" class="block text-red-500 hover:text-red-700 transition duration-300">Logout</a>
+        </div>
     </aside>
 
-
+    <!-- Main Content -->
     <main class="w-3/4 p-8 bg-gray-900">
         <div class="text-center mb-10">
             <h1 class="text-5xl font-extrabold text-blue-400 mb-4">Manage Users</h1>
             <p class="text-lg text-gray-300">Promote users to admins, demote admins to users, or ban users from the platform</p>
         </div>
 
-
+        <!-- User List -->
         <div class="grid grid-cols-1 gap-6">
             <?php
             $stmt = $conn->prepare("SELECT u.id, u.username, u.email, r.name AS role 
@@ -111,8 +114,8 @@ if (isset($_GET['ban_user'])) {
             ?>
         </div>
     </main>
-
 </div>
 
 </body>
 </html>
+
