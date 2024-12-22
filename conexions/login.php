@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['username'] = $user['username']; // Store the username in session
 
                 if ($user['name'] === 'admin') {
-                    header("Location: ../admin/adminpro.php");
+                    header("Location: ../admin/admin.php");
                 } else {
                     header("Location: ../Profile/profile.php");
                 }

@@ -29,14 +29,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $img_path = null;
     }
 
-    // Insert the article into the database
+
     $stmt = $conn->prepare("INSERT INTO articles (titre, para, img, id_users) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("sssi", $titre, $para, $img_path, $user_id);
 
     if ($stmt->execute()) {
         $article_id = $stmt->insert_id;
 
-        // Handle tags logic
+
         $tags_array = explode(',', $tags);
         foreach ($tags_array as $tag) {
             $tag = trim($tag);
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt_tagart->execute();
         }
 
-        // Redirect to prevent resubmission on refresh
+
         header("Location: " . $_SERVER['PHP_SELF']);
         exit();
     } else {
@@ -69,11 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Handling delete request
+
 if (isset($_GET['delete_id'])) {
     $delete_id = intval($_GET['delete_id']);
 
-    // Prepare the delete query to remove the article and its related tags
+
     $stmt = $conn->prepare("DELETE FROM articles WHERE id = ? AND id_users = ?");
     $stmt->bind_param("ii", $delete_id, $user_id);
 
@@ -83,7 +83,7 @@ if (isset($_GET['delete_id'])) {
         echo "<script>Swal.fire('Error!', 'There was a problem deleting the article.', 'error');</script>";
     }
 
-    // Redirect to prevent resubmission on refresh
+
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
@@ -170,7 +170,7 @@ if (isset($_GET['delete_id'])) {
                 <p class="text-gray-400 mt-4"><?php echo htmlspecialchars($row['para']); ?></p>
                 <p class="text-gray-500 text-sm mt-2">Tags: <?php echo htmlspecialchars($row['tags']) ?: 'None'; ?></p>
                 
-                <!-- Delete Button -->
+
                 <a href="?delete_id=<?php echo $row['id']; ?>" 
                    class="mt-4 text-red-600 hover:text-red-800 transition duration-300"
                    onclick="return confirm('Are you sure you want to delete this post?');">Delete Post</a>

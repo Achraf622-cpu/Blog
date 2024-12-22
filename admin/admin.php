@@ -17,7 +17,17 @@ if (isset($_GET['make_admin'])) {
     exit;
 }
 
-// Handle Ban User functionality
+
+if (isset($_GET['make_user'])) {
+    $user_id_to_demote = intval($_GET['make_user']);
+    $stmt = $conn->prepare("UPDATE users SET id_role = (SELECT id FROM roles WHERE name = 'user') WHERE id = ?");
+    $stmt->bind_param("i", $user_id_to_demote);
+    $stmt->execute();
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit;
+}
+
+
 if (isset($_GET['ban_user'])) {
     $user_id_to_ban = intval($_GET['ban_user']);
     $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
@@ -40,24 +50,24 @@ if (isset($_GET['ban_user'])) {
 
 <div class="flex min-h-screen">
 
-    <!-- Sidebar -->
+
     <aside class="w-1/4 bg-gray-800 p-6 border-r border-gray-700">
         <h2 class="text-3xl font-extrabold text-blue-400 mb-6">Admin Panel</h2>
         <ul class="space-y-6">
-            <li><a href="#" class="block text-white hover:text-blue-400 transition duration-300">Dashboard</a></li>
-            <li><a href="#" class="block text-white hover:text-blue-400 transition duration-300">Manage Blogs</a></li>
-            <li><a href="#" class="block text-white hover:text-blue-400 transition duration-300">Manage Users</a></li>
+            <li><a href="../index.php" class="block text-white hover:text-blue-400 transition duration-300">Dashboard</a></li>
+            <li><a href="manage.php" class="block text-white hover:text-blue-400 transition duration-300">Manage Blogs</a></li>
+            <li><a href="" class="block text-white hover:text-blue-400 transition duration-300">Manage Users</a></li>
         </ul>
     </aside>
 
-    <!-- Main Content -->
+
     <main class="w-3/4 p-8 bg-gray-900">
         <div class="text-center mb-10">
             <h1 class="text-5xl font-extrabold text-blue-400 mb-4">Manage Users</h1>
-            <p class="text-lg text-gray-300">Promote users to admins or ban them from the platform</p>
+            <p class="text-lg text-gray-300">Promote users to admins, demote admins to users, or ban users from the platform</p>
         </div>
 
-        <!-- Users List -->
+
         <div class="grid grid-cols-1 gap-6">
             <?php
             $stmt = $conn->prepare("SELECT u.id, u.username, u.email, r.name AS role 
@@ -75,10 +85,15 @@ if (isset($_GET['ban_user'])) {
                         <p class="text-gray-400 mb-4">Role: <?php echo htmlspecialchars($row['role']); ?></p>
 
                         <div class="flex space-x-4">
-                            <?php if ($row['role'] !== 'admin') { ?>
+                            <?php if ($row['role'] === 'user') { ?>
                                 <a href="?make_admin=<?php echo $row['id']; ?>"
                                    class="bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-4 rounded-md transition duration-300">
                                     Make Admin
+                                </a>
+                            <?php } elseif ($row['role'] === 'admin') { ?>
+                                <a href="?make_user=<?php echo $row['id']; ?>"
+                                   class="bg-yellow-600 hover:bg-yellow-700 text-white text-sm py-2 px-4 rounded-md transition duration-300">
+                                    Make User
                                 </a>
                             <?php } ?>
                             <a href="?ban_user=<?php echo $row['id']; ?>"
